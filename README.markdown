@@ -1,6 +1,8 @@
 
 # Rmap - a simple yet powerfull object relational mapper
 
+
+
 ##Installation
 
 ```
@@ -26,8 +28,81 @@ You can get more configuration options by going to the mysql2 gem documentation,
 
 ## How to use
 
+The following will return a representation of the 'posts' table:
+
 ```ruby
-row = db.posts.first
+db.posts
+```
+You can insert rows into the posts table by doing the following:
+
+```ruby
+db.posts.insert(:title => "Hello World", :body => "This is a test")
 ```
 
-more coming soon...
+You can list all the posts by doing the following:
+
+```ruby
+db.posts.all.each do |post|
+  puts "title #{post.title}"
+end
+```
+
+You can list all the posts that contain the word apple by doing the following:
+
+```ruby
+db.posts.contains(:body, "apple").all.each do |post|
+  puts "title #{post.title}"
+end
+```
+
+You can list all the posts that contain the word apple or pear by doing the following:
+
+```ruby
+db.posts.contains(:body, ["apple", "pear"]).all.each do |post|
+  puts "title #{post.title}"
+end
+```
+
+You can retrieve a particular post (row) by doing the following:
+
+```ruby
+db.posts.eq(:id, 7).first
+```
+
+and then you can print the title to the screen:
+
+```ruby
+puts db.posts.eq(:id, 7).first.title
+```
+
+Joins are really easy. To retieve all the posts by gmail users, you can do the following:
+
+```ruby
+db.users.contains(:email, "@gmail.com").posts.all
+```
+
+You can delete all the posts by gmail users by doing the following:
+
+```ruby
+db.users.contains(:email, "@gmail.com").posts.delete
+```
+
+You can update all the posts by gmail users by doing the following:
+
+```ruby
+db.users.contains(:email, "@gmail.com").posts.update(:published => true)
+```
+
+or if you just want to update a column:
+
+```ruby
+db.users.contains(:email, "@gmail.com").posts.published = true
+```
+
+more coming soon....
+
+## License
+
+Rmap is released under the MIT license:
+
+* http://www.opensource.org/licenses/MIT
