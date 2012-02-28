@@ -32,12 +32,17 @@ The following will return a representation of the 'posts' table:
 
 ```ruby
 db.posts
+
+### Creating
+
 ```
 You can insert rows into the posts table by doing the following:
 
 ```ruby
 db.posts.insert(:title => "Hello World", :body => "This is a test")
 ```
+
+## Retrieval
 
 You can list all the posts by doing the following:
 
@@ -75,17 +80,23 @@ and then you can print the title to the screen:
 puts db.posts.eq(:id, 7).first.title
 ```
 
+### Joins
+
 Joins are really easy. To retrieve all the posts by gmail users, you can do the following:
 
 ```ruby
 db.users.contains(:email, "@gmail.com").posts.all
 ```
 
+### Deleting
+
 You can delete all the posts by gmail users by doing the following:
 
 ```ruby
 db.users.contains(:email, "@gmail.com").posts.delete
 ```
+
+### Updating
 
 You can update all the posts by gmail users by doing the following:
 
