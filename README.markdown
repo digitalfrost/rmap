@@ -29,3 +29,5 @@ You can get more configuration options by going to the mysql2 gem documentation,
 ```ruby
 row = db.posts.first
 ```
+
+more coming soon...
