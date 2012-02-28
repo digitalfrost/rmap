@@ -20,7 +20,7 @@ require 'rmap'
 
 db = Rmap::Database.new :database => 'rmap', :username => 'root'
 ```
-You can get more configuration options by going to the mysql2 gem documentation, as rmap wraps the mysql2 gem and simple passes through conf hash to it:
+You can get more configuration options by going to the mysql2 gem documentation, as rmap wraps the mysql2 gem and simply passes through the conf hash to it:
 
 * https://github.com/brianmario/mysql2
 
