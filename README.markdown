@@ -32,17 +32,16 @@ The following will return a representation of the 'posts' table:
 
 ```ruby
 db.posts
-
+```
 ### Creating
 
-```
 You can insert rows into the posts table by doing the following:
 
 ```ruby
 db.posts.insert(:title => "Hello World", :body => "This is a test")
 ```
 
-## Retrieval
+### Retrieval
 
 You can list all the posts by doing the following:
 
