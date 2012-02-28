@@ -75,7 +75,7 @@ and then you can print the title to the screen:
 puts db.posts.eq(:id, 7).first.title
 ```
 
-Joins are really easy. To retieve all the posts by gmail users, you can do the following:
+Joins are really easy. To retrieve all the posts by gmail users, you can do the following:
 
 ```ruby
 db.users.contains(:email, "@gmail.com").posts.all
