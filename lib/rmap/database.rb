@@ -19,5 +19,11 @@ module Rmap
     def method_missing name
       Table.new(self, name)
     end
+    
+    def create(name)
+      @client.query("create table `#{name}`");
+      method_missing(name).add(:primary_key, :id)
+    end
+    
   end
 end

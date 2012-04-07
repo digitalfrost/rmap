@@ -10,7 +10,43 @@ module Rmap
       'ge' => lambda {|left,right| "#{left} >= #{right}"}, 
       'contains' => lambda {|left,right| "#{left} like concat('%', #{right}, '%')"}, 
       'begins_with' => lambda {|left,right| "#{left} like concat('%', #{right})"}, 
-      'ends_with' => lambda {|left,right| "#{left} like concat(#{right}, '%')"}
+      'ends_with' => lambda {|left,right| "#{left} like concat(#{right}, '%')"},
+      'year_eq' => lambda {|left,right| "year(#{left}) = #{right}"},
+      'year_ne' => lambda {|left,right| "year(#{left}) != #{right}"}, 
+      'year_lt' => lambda {|left,right| "year(#{left}) < #{right}"}, 
+      'year_gt' => lambda {|left,right| "year(#{left}) > #{right}"}, 
+      'year_le' => lambda {|left,right| "year(#{left}) <= #{right}"}, 
+      'year_ge' => lambda {|left,right| "year(#{left}) >= #{right}"},
+      'month_eq' => lambda {|left,right| "month(#{left}) = #{right}"},
+      'month_ne' => lambda {|left,right| "month(#{left}) != #{right}"}, 
+      'month_lt' => lambda {|left,right| "month(#{left}) < #{right}"}, 
+      'month_gt' => lambda {|left,right| "month(#{left}) > #{right}"}, 
+      'month_le' => lambda {|left,right| "month(#{left}) <= #{right}"}, 
+      'month_ge' => lambda {|left,right| "month(#{left}) >= #{right}"},
+      'day_eq' => lambda {|left,right| "day(#{left}) = #{right}"},
+      'day_ne' => lambda {|left,right| "day(#{left}) != #{right}"}, 
+      'day_lt' => lambda {|left,right| "day(#{left}) < #{right}"}, 
+      'day_gt' => lambda {|left,right| "day(#{left}) > #{right}"}, 
+      'day_le' => lambda {|left,right| "day(#{left}) <= #{right}"}, 
+      'day_ge' => lambda {|left,right| "day(#{left}) >= #{right}"},
+      'hour_eq' => lambda {|left,right| "hour(#{left}) = #{right}"},
+      'hour_ne' => lambda {|left,right| "hour(#{left}) != #{right}"}, 
+      'hour_lt' => lambda {|left,right| "hour(#{left}) < #{right}"}, 
+      'hour_gt' => lambda {|left,right| "hour(#{left}) > #{right}"}, 
+      'hour_le' => lambda {|left,right| "hour(#{left}) <= #{right}"}, 
+      'hour_ge' => lambda {|left,right| "hour(#{left}) >= #{right}"},
+      'minute_eq' => lambda {|left,right| "minute(#{left}) = #{right}"},
+      'minute_ne' => lambda {|left,right| "minute(#{left}) != #{right}"}, 
+      'minute_lt' => lambda {|left,right| "minute(#{left}) < #{right}"}, 
+      'minute_gt' => lambda {|left,right| "minute(#{left}) > #{right}"}, 
+      'minute_le' => lambda {|left,right| "minute(#{left}) <= #{right}"}, 
+      'minute_ge' => lambda {|left,right| "minute(#{left}) >= #{right}"},
+      'second_eq' => lambda {|left,right| "second(#{left}) = #{right}"},
+      'second_ne' => lambda {|left,right| "second(#{left}) != #{right}"}, 
+      'second_lt' => lambda {|left,right| "second(#{left}) < #{right}"}, 
+      'second_gt' => lambda {|left,right| "second(#{left}) > #{right}"}, 
+      'second_le' => lambda {|left,right| "second(#{left}) <= #{right}"}, 
+      'second_ge' => lambda {|left,right| "second(#{left}) >= #{right}"},
     }
     
     attr_accessor :name
@@ -239,6 +275,40 @@ module Rmap
       out = 0
       @database.client.query(generate_select_sql("sum(#{sql_expression})", limit), :as => :array).each{|row| out += row.first}
       out
+    end
+    
+    def drop
+      @database.client.query("drop table `#{@name}`")
+    end
+    
+    def add(type, name, options = {})
+      case type
+      when :string
+        @database.client.query("alter table `#{@name}` add `#{name}` varchar(255) not null")
+      when :text
+        @database.client.query("alter table `#{@name}` add `#{name}` longtext not null")
+      when :binary
+        @database.client.query("alter table `#{@name}` add `#{name}` longblob not null")
+      when :integer
+        @database.client.query("alter table `#{@name}` add `#{name}` int signed not null")
+      when :foreign_key
+        @database.client.query("alter table `#{@name}` add `#{name}` int unsigned not null")
+        @database.client.query("alter table `#{@name}` add index(`#{name}`)")
+      when :primary_key
+        @database.client.query("alter table `#{@name}` add `#{name}` int unsigned not null auto_increment primary key")
+      when :date
+        @database.client.query("alter table `#{@name}` add `#{name}` date not null")
+      when :datetime
+        @database.client.query("alter table `#{@name}` add `#{name}` datetime not null")
+      when :boolean
+        @database.client.query("alter table `#{@name}` add `#{name}` enum('true', 'false') not null")
+      when :decimal
+        @database.client.query("alter table `#{@name}` add `#{name}` decimal not null")
+      end
+    end
+    
+    def remove(name)
+      @database.client.query("alter table `#{@name}` drop `#{name}`")
     end
     
   end
