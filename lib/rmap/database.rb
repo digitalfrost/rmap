@@ -14,14 +14,26 @@ module Rmap
     end
     
     def host(host)
+      @client = nil
+      @table_names = nil
       @conf[:host] = host
     end
     
     def username(username)
+      @client = nil
+      @table_names = nil
       @conf[:username] = username
     end
     
+    def password(password)
+      @client = nil
+      @table_names = nil
+      @conf[:password] = password
+    end
+    
     def database(database)
+      @client = nil
+      @table_names = nil
       @conf[:database] = database
     end
     
