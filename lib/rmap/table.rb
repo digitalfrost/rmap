@@ -88,6 +88,9 @@ module Rmap
         all.map{|row| row.fetch(name).first}
       elsif column?(name.to_s.sub(/=\Z/, "")) && name.match(/\A(.*)=\Z/)
         all.each{|row| row.update($1 => args[0])}
+      elsif name.match /\A(.*?)_(#{BINARY_FILTER_METHODS.keys.join('|')})\Z/
+        @binary_filter_methods_args[$2].push([$1,args[0]])
+        self
       else
         super
       end
@@ -168,10 +171,10 @@ module Rmap
           "#{table1.name}.#{foreign_key} = #{table2.name}.id"
         end
       else
-        if table2.column? "#{table1.name}_id"
-          "#{table1.name}.id = #{table2.name}.#{table1.name}_id"
+        if table2.column? "#{table1.name.to_s.gsub(/ies\Z/, "y").gsub(/s\Z/, "")}_id"
+          "#{table1.name}.id = #{table2.name.to_s.gsub(/ies\Z/, "y").gsub(/s\Z/, "")}.#{table1.name}_id"
         else
-          "#{table1.name}.#{table2.name}_id = #{table2.name}.id"
+          "#{table1.name}.#{table2.name.to_s.gsub(/ies\Z/, "y").gsub(/s\Z/, "")}_id = #{table2.name}.id"
         end
       end
     end
