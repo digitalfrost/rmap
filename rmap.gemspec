@@ -17,7 +17,9 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
-  # specify any dependencies here; for example:
-  # s.add_development_dependency "rspec"
-  # s.add_runtime_dependency "rest-client"
+  s.add_dependency "mysql2", "~> 0.3"
+  s.add_dependency "json", "~> 1.7"
+  s.add_dependency "ripl", "~> 0.6"
+  s.add_dependency "ripl-multi_line", "~> 0.3"
+  
 end
