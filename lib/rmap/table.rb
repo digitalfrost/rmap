@@ -78,7 +78,7 @@ module Rmap
     end
     
     def column?(name)
-      @database.client.query("describe #{@name} #{name}").count > 0
+      @database.client.query("describe #{@name} `#{name}`").count > 0
     end
     
     def method_missing name, *args
@@ -255,6 +255,11 @@ module Rmap
       out
     end
     
+    def each &block
+      all.each &block
+      nil
+    end
+    
     def first
       all(1).first
     end
@@ -264,7 +269,7 @@ module Rmap
     end
     
     def delete
-      all.each {|row| row.delete}
+      each {|row| row.delete}
     end
     
     def insert(hash)
@@ -278,10 +283,11 @@ module Rmap
     end
     
     def drop
+      eval("@table_names = nil", @database.bindings)
       @database.client.query("drop table `#{@name}`")
     end
     
-    def add(type, name, options = {})
+    def add(name, type, options = {})
       case type
       when :string
         @database.client.query("alter table `#{@name}` add `#{name}` varchar(255) not null")
@@ -294,8 +300,6 @@ module Rmap
       when :foreign_key
         @database.client.query("alter table `#{@name}` add `#{name}` int unsigned not null")
         @database.client.query("alter table `#{@name}` add index(`#{name}`)")
-      when :primary_key
-        @database.client.query("alter table `#{@name}` add `#{name}` int unsigned not null auto_increment primary key")
       when :date
         @database.client.query("alter table `#{@name}` add `#{name}` date not null")
       when :datetime
@@ -309,6 +313,15 @@ module Rmap
     
     def remove(name)
       @database.client.query("alter table `#{@name}` drop `#{name}`")
+    end
+    
+    
+    def column_names
+      @database.client.query("describe `#{@name}`", :as => :hash).map {|row| row['Field']}
+    end
+    
+    def to_s
+      all.to_s
     end
     
   end

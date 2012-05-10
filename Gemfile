@@ -4,3 +4,7 @@ source "http://rubygems.org"
 gemspec
 
 gem 'mysql2'
+gem 'json'
+gem 'ripl'
+gem 'ripl-multi_line'
+

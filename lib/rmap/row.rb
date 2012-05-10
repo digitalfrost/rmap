@@ -1,4 +1,6 @@
 
+require 'json'
+
 module Rmap
   class Row
   
@@ -25,13 +27,17 @@ module Rmap
     def method_missing name, *args
       if @database.table? name
         Table.new(@database, name).join(Table.new(@database, @table_name).eq(:id, @id), *args)
+      elsif name.match(/\A.*=\Z/) && @database.method_missing(@table_name).column?(name.to_s.sub(/=\Z/, ""))
+        update(name[/\A(.*)=\Z/, 1] => args[0])
       elsif @database.method_missing(@table_name).column? name
         fetch(name).first
-      elsif @database.method_missing(@table_name).column?(name.to_s.sub(/=\Z/, "")) && name.match(/\A(.*)=\Z/)
-        update($1 => args[0])
       else
         super
       end
+    end
+    
+    def to_s
+      @database.client.query("select * from `#{@table_name}` where id = '#{id}'", :as => :hash).first.to_json
     end
     
   end

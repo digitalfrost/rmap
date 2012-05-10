@@ -1,28 +1,60 @@
 
 module Rmap
   class Database
-  
-    attr_accessor :client
     
-    def initialize(conf={})
-      @client = Mysql2::Client.new(conf)
-      @show_tables_cache
+    def initialize(conf={:username => 'root'})
+      @conf = conf
+    end
+    
+    def client
+      if @client.nil?
+        @client = Mysql2::Client.new(@conf)
+      end
+      @client
+    end
+    
+    def host(host)
+      @conf[:host] = host
+    end
+    
+    def username(username)
+      @conf[:username] = username
+    end
+    
+    def database(database)
+      @conf[:database] = database
+    end
+    
+    def bindings
+      binding
+    end
+    
+    def run(file_path)
+      instance_eval(::File.open(file_path).read, file_path)
     end
     
     def table?(name)
-      if @show_tables_cache.nil?
-        @show_tables_cache = @client.query("show tables", :as => :array).map{|a| a[0]}
-      end
-      @show_tables_cache.include?(name.to_s)
+      table_names.include?(name.to_s)
     end
     
-    def method_missing name
-      Table.new(self, name)
+    def method_missing name, *args
+      if table_names.include? name.to_s
+        Table.new(self, name)
+      else
+        super(name, *args)
+      end
     end
     
     def create(name)
-      @client.query("create table `#{name}`");
-      method_missing(name).add(:primary_key, :id)
+      @table_names = nil
+      client.query("create table `#{name}`(id int unsigned not null auto_increment primary key)")
+    end
+    
+    def table_names
+      if @table_names.nil?
+        @table_names = client.query("show tables", :as => :array).map{|a| a[0]}
+      end
+      @table_names
     end
     
   end
