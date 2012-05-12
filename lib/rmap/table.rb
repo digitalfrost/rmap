@@ -89,7 +89,7 @@ module Rmap
       elsif column?(name.to_s.sub(/=\Z/, "")) && name.match(/\A(.*)=\Z/)
         all.each{|row| row.update($1 => args[0])}
       elsif name.match /\A(.*?)_(#{BINARY_FILTER_METHODS.keys.join('|')})\Z/
-        @binary_filter_methods_args[$2].push([$1,args[0]])
+        @binary_filter_methods_args[$2].push([$1.split(/_or_/),args[0]])
         self
       else
         super
