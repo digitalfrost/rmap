@@ -171,10 +171,10 @@ module Rmap
           "#{table1.name}.#{foreign_key} = #{table2.name}.id"
         end
       else
-        if table2.column? "#{table1.name.to_s.gsub(/ies\Z/, "y").gsub(/s\Z/, "")}_id"
-          "#{table1.name}.id = #{table2.name.to_s.gsub(/ies\Z/, "y").gsub(/s\Z/, "")}.#{table1.name}_id"
+        if table2.column? "#{to_singular(table1.name)}_id"
+          "#{table1.name}.id = #{to_singular(table2.name)}.#{table1.name}_id"
         else
-          "#{table1.name}.#{table2.name.to_s.gsub(/ies\Z/, "y").gsub(/s\Z/, "")}_id = #{table2.name}.id"
+          "#{table1.name}.#{to_singular(table2.name)}_id = #{table2.name}.id"
         end
       end
     end
@@ -318,13 +318,24 @@ module Rmap
       @database.client.query("alter table `#{@name}` drop `#{name}`")
     end
     
-    
     def column_names
       @database.client.query("describe `#{@name}`", :as => :hash).map {|row| row['Field']}
     end
     
     def to_s
       all.to_s
+    end
+    
+    private
+    
+    def to_singular(value)
+      if value.to_s.match /\A(.*)ies\Z/
+        "#{$1}y"
+      elsif value.to_s.match /\A(.*ss)es\Z/
+        $1
+      else
+        value.to_s.gsub(/s\Z/, "")
+      end
     end
     
   end
