@@ -2,8 +2,11 @@
 module Rmap
   class Database
     
-    def initialize(conf={:username => 'root'})
+    def initialize(conf={:username => 'root'}, &block)
       @conf = conf
+      if !block.nil?
+        instance_eval(&block)
+      end
     end
     
     def client
@@ -41,8 +44,13 @@ module Rmap
       binding
     end
     
-    def run(file_path)
-      instance_eval(::File.open(file_path).read, file_path)
+    def run(file_path = nil, &block)
+      if !file_path.nil?
+        instance_eval(::File.open(file_path).read, file_path)
+      end
+      if !block.nil?
+        instance_eval(&block)
+      end
     end
     
     def table?(name)
