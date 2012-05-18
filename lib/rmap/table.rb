@@ -172,7 +172,7 @@ module Rmap
         end
       else
         if table2.column? "#{to_singular(table1.name)}_id"
-          "#{table1.name}.id = #{to_singular(table2.name)}.#{table1.name}_id"
+          "#{table1.name}.id = #{table2.name}.#{to_singular(table1.name)}_id"
         else
           "#{table1.name}.#{to_singular(table2.name)}_id = #{table2.name}.id"
         end
