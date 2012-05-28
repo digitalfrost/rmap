@@ -277,6 +277,7 @@ module Rmap
     
     def insert(hash)
       @database.client.query("insert into `#{@name}`(#{(hash.map{|k,v| "`#{k}`"}).join(', ')}) values(#{(hash.map{|k,v| quote(v)}).join(', ')})")
+      @database.client.last_id
     end
     
     def sum(sql_expression, limit = nil)
