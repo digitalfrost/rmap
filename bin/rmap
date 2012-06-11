@@ -1,18 +1,5 @@
 
 require 'rmap'
-require 'ripl'
-require 'ripl/multi_line'
+require 'powerline'
 
-db = Rmap::Database.new
-
-current = Dir::getwd
-while current != '/'
-  if ::File.file? "#{current}/conf.rmap.rb"
-    db.run("#{current}/conf.rmap.rb")
-    break
-  end
-  current = ::File.expand_path('../',  current)
-end
-
-Ripl.start :binding => db.bindings
-
+Powerline.new Rmap::Commands

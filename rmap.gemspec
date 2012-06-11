@@ -21,5 +21,7 @@ Gem::Specification.new do |s|
   s.add_dependency "json", "~> 1"
   s.add_dependency "ripl", "~> 0"
   s.add_dependency "ripl-multi_line", "~> 0"
+  s.add_dependency "powerline", "~> 0"
+  s.add_dependency "gengin", "~> 0"
   
 end
