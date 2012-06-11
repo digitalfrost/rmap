@@ -1,4 +1,6 @@
 
+require 'mysql2'
+
 module Rmap
   class Database
     

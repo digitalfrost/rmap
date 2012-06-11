@@ -1,6 +1,7 @@
 
 require 'ripl'
 require 'ripl/multi_line'
+require 'gengin'
 
 module Rmap
   module Commands
@@ -8,16 +9,23 @@ module Rmap
     def self.console
       db = Rmap::Database.new
       
-      current = Dir::getwd
-      while current != '/'
-        if ::File.file? "#{current}/conf.rmap.rb"
-          db.run("#{current}/conf.rmap.rb")
-          break
-        end
-        current = ::File.expand_path('../',  current)
+      if !Rmap::CONF_ROOT.nil?
+        db.run("#{Rmap::CONF_ROOT}/conf.rmap.rb")
       end
 
       Ripl.start :binding => db.bindings
+    end
+    
+    def Generate
+      
+      def self.conf(database, options={})
+        Gengin.new do
+          source_root File.expand_path("../generator_templates/", __FILE__)
+          erb_var :database, database
+          copy "conf.rmap.rb", :erb => true
+        end
+      end
+      
     end
     
   end
