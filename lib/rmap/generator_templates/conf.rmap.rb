@@ -2,4 +2,4 @@
 #host "localhost"
 #username "root"
 #password ""
-database "<%= database %>"
+database "<%= @database %>"

@@ -1,10 +1,9 @@
 
 
 module Rmap
-  CONF_ROOT = nil
   current = Dir::getwd
   while current != '/'
-    if ::File.file? "#{current}/rmap.conf.rb"
+    if ::File.file? "#{current}/conf.rmap.rb"
       CONF_ROOT = current
       break
     end
