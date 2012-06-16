@@ -37,6 +37,10 @@ module Rmap
           @name = name
           @columns = columns
           
+          if !::File.file?("#{Rmap::CONF_ROOT}/migrations/version.rmap.rb")
+            copy "version.rmap.rb"
+          end
+          
           copy "migration.rmap.rb", "#{Time.new.to_i}_#{name.gsub(/\W/, "_")}.migration.rmap.rb"
           
         end
