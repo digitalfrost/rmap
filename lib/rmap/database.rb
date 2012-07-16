@@ -60,11 +60,7 @@ module Rmap
     end
     
     def method_missing name, *args
-      if table_names.include? name.to_s
-        Table.new(self, name)
-      else
-        super(name, *args)
-      end
+      Table.new(self, name)
     end
     
     def create(name)

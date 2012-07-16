@@ -296,6 +296,11 @@ module Rmap
     end
     
     def add(name, type, options = {})
+      
+      if !@database.table? @name
+        @database.create @name
+      end
+    
       case type
       when :string
         @database.client.query("alter table `#{@name}` add `#{name}` varchar(255) not null")
