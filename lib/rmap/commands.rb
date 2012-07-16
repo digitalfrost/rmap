@@ -37,28 +37,47 @@ module Rmap
           @name = name
           @columns = columns
           
-          if !::File.file?("#{Rmap::CONF_ROOT}/migrations/version.rmap.rb")
-            copy "version.rmap.rb"
-          end
-          
-          copy "migration.rmap.rb", "#{Time.new.to_i}_#{name.gsub(/\W/, "_")}.migration.rmap.rb"
+          copy "migration.rmap.rb", "#{Time.new.to_i}_#{name.downcase.strip.gsub(/\W+/, "_")}.migration.rmap.rb"
           
         end
         
       end
       
     end
+
     
-    module Migrate
+    def self.migrate(options = {})
+      db = Rmap::Database.new
     
-      def self.up
-        
+      if Rmap.const_defined? :CONF_ROOT
+        db.run("#{Rmap::CONF_ROOT}/conf.rmap.rb")
       end
-    
-      def self.down
-        
+      
+      if !db.table? :rmap_vars
+        db.create :rmap_vars
+        db.rmap_vars.add :key, :string
+        db.rmap_vars.add :value, :binary
       end
-    
+      
+      if db.rmap_vars.key_eq(:current_migration).count == 0
+        db.rmap_vars.insert(:key => :current_migration, :value => 0)
+        current_migration = 0
+      else
+        current_migration = db.rmap_vars.key_eq(:current_migration).first.value.to_i
+      end
+      
+      migrations = Dir.new("#{Rmap::CONF_ROOT}/migrations/").to_a.find_all{|file| ::File.file? "#{Rmap::CONF_ROOT}/migrations/#{file}" }.map{ |file| Rmap::Migration.new("#{Rmap::CONF_ROOT}/migrations/#{file}") }.sort {|l,r| l.schema_version <=> r.schema_version}
+      
+      if migrations.count > 0
+        migrations.each do |migration|
+          if migration.schema_version > current_migration
+            puts "running: #{migration.schema_version}"
+            db.run &migration.up_block
+          end
+        end
+        db.rmap_vars.key_eq(:current_migration).value = migrations.last.schema_version.to_s
+      end
+           
     end
     
   end

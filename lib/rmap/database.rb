@@ -8,7 +8,7 @@ module Rmap
       @conf = conf
       if !block.nil?
         instance_eval(&block)
-      end
+      end      
     end
     
     def client
