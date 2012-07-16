@@ -246,6 +246,10 @@ module Rmap
       "select #{format_sql(expression_list_sql)} #{generate_from_sql} #{generate_where_sql} #{generate_group_by_sql} #{generate_order_by_sql} #{limit_sql}"
     end
     
+    def explain
+      generate_select_sql('id').strip
+    end
+    
     def count(limit = nil)
       @database.client.query(generate_select_sql('id', limit)).count
     end
