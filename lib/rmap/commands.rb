@@ -16,8 +16,25 @@ module Rmap
       Ripl.start :binding => db.bindings
     end
     
-    def self.current_migration
+    def self.current_migration(options)
+      if !db.table? :rmap_vars
+        db.create :rmap_vars
+        db.rmap_vars.add :key, :string
+        db.rmap_vars.add :value, :binary
+      end
       
+      if db.rmap_vars.key_eq(:current_migration).count == 0
+        db.rmap_vars.insert(:key => :current_migration, :value => 0)
+        current_migration = 0
+      else
+        current_migration = db.rmap_vars.key_eq(:current_migration).first.value.to_i
+      end
+      
+      if options[:echo] != false
+        puts current_migration
+      end
+      
+      current_migration
     end
     
     module Generate
@@ -51,24 +68,9 @@ module Rmap
 
     
     def self.migrate(options = {})
-      db = Rmap::Database.new
-    
-      if Rmap.const_defined? :CONF_ROOT
-        db.run("#{Rmap::CONF_ROOT}/conf.rmap.rb")
-      end
+      db = Rmap::Commands::db
       
-      if !db.table? :rmap_vars
-        db.create :rmap_vars
-        db.rmap_vars.add :key, :string
-        db.rmap_vars.add :value, :binary
-      end
-      
-      if db.rmap_vars.key_eq(:current_migration).count == 0
-        db.rmap_vars.insert(:key => :current_migration, :value => 0)
-        current_migration = 0
-      else
-        current_migration = db.rmap_vars.key_eq(:current_migration).first.value.to_i
-      end
+      current_migration = Rmap::Commands::current_migration(:echo => false)
       
       migrations = Dir.new("#{Rmap::CONF_ROOT}/migrations/").to_a.find_all{|file| ::File.file? "#{Rmap::CONF_ROOT}/migrations/#{file}" }.map{ |file| Rmap::Migration.new("#{Rmap::CONF_ROOT}/migrations/#{file}") }.sort {|l,r| l.schema_version <=> r.schema_version}
       
@@ -128,6 +130,16 @@ module Rmap
       end
            
     end
+  
+  private
     
+  def self.db
+    db = Rmap::Database.new
+    if Rmap.const_defined? :CONF_ROOT
+      db.run("#{Rmap::CONF_ROOT}/conf.rmap.rb")
+    end
+    db
+  end
+  
   end
 end
