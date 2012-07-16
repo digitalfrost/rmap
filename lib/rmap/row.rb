@@ -17,7 +17,7 @@ module Rmap
     end
     
     def update(hash)
-      @database.client.query("update `#{@table_name}` set #{(hash.map{|k,v| "`#{k}`='#{@database.client.escape(v)}'"}).join(', ')} where id = '#{id}'")
+      @database.client.query("update `#{@table_name}` set #{(hash.map{|k,v| "`#{k}`='#{@database.client.escape(v.to_s)}'"}).join(', ')} where id = '#{id}'")
     end
     
     def delete

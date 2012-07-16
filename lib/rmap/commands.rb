@@ -16,6 +16,10 @@ module Rmap
       Ripl.start :binding => db.bindings
     end
     
+    def self.current_migration
+      
+    end
+    
     module Generate
       
       def self.conf(database, options={})
@@ -95,7 +99,6 @@ module Rmap
               break
             end
           end
-          #todo: .to_s should not need to be specified
           db.rmap_vars.key_eq(:current_migration).value = to.to_s
         elsif to < current_migration
           migrations.reverse.each do |migration|
@@ -109,13 +112,11 @@ module Rmap
               break
             end
           end
-          #todo: .to_s should not need to be specified
-          db.rmap_vars.key_eq(:current_migration).value = to.to_s
+          db.rmap_vars.key_eq(:current_migration).value = to
         else
           raise "already at migration #{to}"
         end
         
-        #work out direction (up|down)
       elsif migrations.count > 0
         migrations.each do |migration|
           if migration.schema_version > current_migration
@@ -123,8 +124,7 @@ module Rmap
             db.run &migration.up_block
           end
         end
-        #todo: .to_s should not need to be specified
-        db.rmap_vars.key_eq(:current_migration).value = migrations.last.schema_version.to_s
+        db.rmap_vars.key_eq(:current_migration).value = migrations.last.schema_version
       end
            
     end
