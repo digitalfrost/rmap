@@ -68,13 +68,62 @@ module Rmap
       
       migrations = Dir.new("#{Rmap::CONF_ROOT}/migrations/").to_a.find_all{|file| ::File.file? "#{Rmap::CONF_ROOT}/migrations/#{file}" }.map{ |file| Rmap::Migration.new("#{Rmap::CONF_ROOT}/migrations/#{file}") }.sort {|l,r| l.schema_version <=> r.schema_version}
       
-      if migrations.count > 0
+      if !options[:to].nil?
+        to = options[:to].to_i
+        found = false
+        migrations.each do |migration|
+          if migration.schema_version == to
+            found = true
+            break
+          end
+        end
+        
+        if !found
+          raise "No such migration '#{to}' exists"
+        end
+        
+        if to > current_migration
+          migrations.each do |migration|
+            if migration.schema_version <= current_migration
+              next
+            end
+            
+            if migration.schema_version <= to
+              puts "up: #{migration.schema_version}"
+              db.run &migration.up_block
+            else
+              break
+            end
+          end
+          #todo: .to_s should not need to be specified
+          db.rmap_vars.key_eq(:current_migration).value = to.to_s
+        elsif to < current_migration
+          migrations.reverse.each do |migration|
+            if migration.schema_version > current_migration
+              next
+            end
+            if migration.schema_version > to
+              puts "down: #{migration.schema_version}"
+              db.run &migration.down_block
+            else
+              break
+            end
+          end
+          #todo: .to_s should not need to be specified
+          db.rmap_vars.key_eq(:current_migration).value = to.to_s
+        else
+          raise "already at migration #{to}"
+        end
+        
+        #work out direction (up|down)
+      elsif migrations.count > 0
         migrations.each do |migration|
           if migration.schema_version > current_migration
-            puts "running: #{migration.schema_version}"
+            puts "up: #{migration.schema_version}"
             db.run &migration.up_block
           end
         end
+        #todo: .to_s should not need to be specified
         db.rmap_vars.key_eq(:current_migration).value = migrations.last.schema_version.to_s
       end
            
