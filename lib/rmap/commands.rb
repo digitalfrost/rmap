@@ -58,7 +58,31 @@ module Rmap
           @name = name
           @columns = columns
           
-          copy "migration.rmap.rb", "#{Time.new.to_i}_#{name.downcase.strip.gsub(/\W+/, "_")}.migration.rmap.rb"
+          up_code_buf = []
+          down_code_buf = []
+          
+          if name.match(/\Aadd_.*_to_(.*?)\Z/)
+            table_name = $1
+            @columns.each do |column|
+              (column_name, type) = column.split(/:/)
+              up_code_buf << "  #{table_name}.add :#{column_name}, :#{type}"
+              down_code_buf << "  #{table_name}.remove :#{column_name}"
+            end
+          end
+          
+          if name.match(/\Aremove_.*_from_(.*?)\Z/)
+            table_name = $1
+            @columns.each do |column|
+              (column_name, type) = column.split(/:/)
+              up_code_buf << "  #{table_name}.remove :#{column_name}"
+              down_code_buf << "  #{table_name}.add :#{column_name}, :#{type}"
+            end
+          end
+          
+          @up_code = up_code_buf.join("\n")
+          @down_code = down_code_buf.join("\n")
+          
+          copy "migration.rmap.rb", "#{Time.new.to_i}_#{name.downcase.strip.gsub(/\W+/, "_")}.migration.rmap.rb", :erb => true
           
         end
         
