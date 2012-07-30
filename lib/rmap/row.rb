@@ -36,8 +36,12 @@ module Rmap
       end
     end
     
+    def to_hash
+      @database.client.query("select * from `#{@table_name}` where id = '#{id}'", :as => :hash).first
+    end
+    
     def to_s
-      @database.client.query("select * from `#{@table_name}` where id = '#{id}'", :as => :hash).first.to_json
+      to_hash.to_json
     end
     
   end
