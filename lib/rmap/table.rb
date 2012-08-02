@@ -82,6 +82,7 @@ module Rmap
     end
     
     def method_missing name, *args
+      table = self
       if @database.table? name
         Table.new(@database, name).join(self, *args)
       elsif column? name
@@ -90,6 +91,9 @@ module Rmap
         all.each{|row| row.update($1 => args[0])}
       elsif name.match /\A(.*?)_(#{BINARY_FILTER_METHODS.keys.join('|')})\Z/
         @binary_filter_methods_args[$2].push([$1.split(/_or_/),args[0]])
+        self
+      elsif @database.instance_eval{!@scopes[table.name].nil? && !@scopes[table.name][name].nil?}
+        instance_exec *args, &@database.instance_eval{@scopes[table.name][name]}
         self
       else
         super
@@ -334,6 +338,16 @@ module Rmap
     
     def to_s
       all.to_s
+    end
+    
+    def scope(name, &block)
+      table = self
+      @database.instance_eval do
+        if @scopes[table.name].nil?
+          @scopes[table.name] = {}
+        end
+        @scopes[table.name][name.to_sym] = block
+      end
     end
     
     private

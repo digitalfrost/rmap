@@ -9,6 +9,7 @@ module Rmap
       if !block.nil?
         instance_eval(&block)
       end
+      @scopes = {}
     end
     
     def client
