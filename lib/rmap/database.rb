@@ -8,7 +8,7 @@ module Rmap
       @conf = conf
       if !block.nil?
         instance_eval(&block)
-      end      
+      end
     end
     
     def client
@@ -65,7 +65,7 @@ module Rmap
     
     def create(name)
       @table_names = nil
-      client.query("create table `#{name}`(id int unsigned not null auto_increment primary key)")
+      client.query("create table `#{name}`(id int unsigned not null auto_increment primary key) engine = InnoDB")
     end
     
     def table_names
@@ -73,6 +73,18 @@ module Rmap
         @table_names = client.query("show tables", :as => :array).map{|a| a[0]}
       end
       @table_names
+    end
+    
+    def start_transaction
+      client.query("start transaction")
+    end
+    
+    def commit_transaction
+      client.query("commit")
+    end
+    
+    def rollback_transaction
+      client.query("rollback")
     end
     
   end
