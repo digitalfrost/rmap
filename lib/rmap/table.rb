@@ -340,7 +340,7 @@ module Rmap
       all.to_s
     end
     
-    def scope(name, &block)
+    def define_scope(name, &block)
       table = self
       @database.instance_eval do
         if @scopes[table.name].nil?
