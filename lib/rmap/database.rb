@@ -4,43 +4,32 @@ require 'mysql2'
 module Rmap
   class Database
     
-    def initialize(conf={:username => 'root'}, &block)
-      @conf = conf
+    def initialize(connection={}, &block)
+      self.connection = connection
       if !block.nil?
         instance_eval(&block)
       end
       @scopes = {}
     end
     
+    def connection=(connection)
+      @connection = {:host => "localhost", :username => "root", :password => ""}.merge connection
+      close
+      @table_names = nil
+    end
+    
     def client
       if @client.nil?
-        @client = Mysql2::Client.new(@conf)
+        @client = Mysql2::Client.new(@connection)
       end
       @client
     end
     
-    def host(host)
+    def close
+      if !@client.nil?
+        @client.close
+      end
       @client = nil
-      @table_names = nil
-      @conf[:host] = host
-    end
-    
-    def username(username)
-      @client = nil
-      @table_names = nil
-      @conf[:username] = username
-    end
-    
-    def password(password)
-      @client = nil
-      @table_names = nil
-      @conf[:password] = password
-    end
-    
-    def database(database)
-      @client = nil
-      @table_names = nil
-      @conf[:database] = database
     end
     
     def bindings
