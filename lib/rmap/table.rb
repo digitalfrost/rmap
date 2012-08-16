@@ -241,26 +241,38 @@ module Rmap
       out
     end
     
-    def generate_select_sql(expression_list_sql, limit = nil)
-      if !limit.nil?
-        limit_sql = "limit #{limit}"
+    def generate_limit_sql
+      if !@limit_row_count.nil?
+        "limit #{@limit_offset}, #{@limit_row_count}"
       else 
-        limit_sql = ''
+        ""
       end
-      "select #{format_sql(expression_list_sql)} #{generate_from_sql} #{generate_where_sql} #{generate_group_by_sql} #{generate_order_by_sql} #{limit_sql}"
+    end
+    
+    def generate_select_sql(expression_list_sql, without_limit_sql = false)
+      "select #{format_sql(expression_list_sql)} #{generate_from_sql} #{generate_where_sql} #{generate_group_by_sql} #{generate_order_by_sql} #{without_limit_sql ? "" : generate_limit_sql}"
     end
     
     def explain
       generate_select_sql('id').strip
     end
     
-    def count(limit = nil)
-      @database.client.query(generate_select_sql('id', limit)).count
+    def count
+      @database.client.query(generate_select_sql('id')).count
     end
     
-    def all(limit = nil)
+    def page_count
+      count_without_limit = @database.client.query(generate_select_sql('id', true)).count
+      if count_without_limit  > 0
+        @page_size.nil? ? 1 : (count_with_limit.to_f / @page_size).ceil
+      else
+        0
+      end
+    end
+    
+    def all
       out = []
-      @database.client.query(generate_select_sql('id', limit), :as => :hash).each do |row|
+      @database.client.query(generate_select_sql('id'), :as => :hash).each do |row|
         out.push(Row.new(@database, @name, row['id']))
       end
       out
@@ -272,7 +284,7 @@ module Rmap
     end
     
     def first
-      all(1).first
+      all.first
     end
     
     def update(hash)
@@ -288,9 +300,9 @@ module Rmap
       @database.client.last_id
     end
     
-    def sum(sql_expression, limit = nil)
+    def sum(sql_expression)
       out = 0
-      @database.client.query(generate_select_sql("sum(#{sql_expression})", limit), :as => :array).each{|row| out += row.first}
+      @database.client.query(generate_select_sql("sum(#{sql_expression})"), :as => :array).each{|row| out += row.first}
       out
     end
     
@@ -348,6 +360,12 @@ module Rmap
         end
         @scopes[table.name][name.to_sym] = block
       end
+    end
+    
+    def paginate(page, page_size = 10)
+      @limit_row_count = page_size
+      @limit_offset = (page - 1) * page_size
+      self
     end
     
     private
