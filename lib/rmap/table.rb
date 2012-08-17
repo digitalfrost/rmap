@@ -241,26 +241,25 @@ module Rmap
       out
     end
     
-    def generate_select_sql(expression_list_sql, limit = nil)
-      if !limit.nil?
-        limit_sql = "limit #{limit}"
-      else 
-        limit_sql = ''
-      end
-      "select #{format_sql(expression_list_sql)} #{generate_from_sql} #{generate_where_sql} #{generate_group_by_sql} #{generate_order_by_sql} #{limit_sql}"
+    def generate_limit_sql
+      @page.nil? ? "" : "limit #{(@page - 1) * @page_size}, #{@page_size}"
+    end
+    
+    def generate_select_sql(expression_list_sql, without_limit = false)
+      "select #{format_sql(expression_list_sql)} #{generate_from_sql} #{generate_where_sql} #{generate_group_by_sql} #{generate_order_by_sql} #{without_limit ? "" : generate_limit_sql}"
     end
     
     def explain
       generate_select_sql('id').strip
     end
     
-    def count(limit = nil)
-      @database.client.query(generate_select_sql('id', limit)).count
+    def count
+      @database.client.query(generate_select_sql('id')).count
     end
     
-    def all(limit = nil)
+    def all
       out = []
-      @database.client.query(generate_select_sql('id', limit), :as => :hash).each do |row|
+      @database.client.query(generate_select_sql('id'), :as => :hash).each do |row|
         out.push(Row.new(@database, @name, row['id']))
       end
       out
@@ -272,7 +271,7 @@ module Rmap
     end
     
     def first
-      all(1).first
+      all.first
     end
     
     def update(hash)
@@ -347,6 +346,21 @@ module Rmap
           @scopes[table.name] = {}
         end
         @scopes[table.name][name.to_sym] = block
+      end
+    end
+    
+    def paginate(page, page_size = 10)
+      @page = page
+      @page_size = page_size
+      self
+    end
+    
+    def page_count
+      count_without_limit = @database.client.query(generate_select_sql('id', true)).count
+      if !@page.nil?
+        (count_without_limit.to_f / @page_size).ceil
+      else
+        count_without_limit > 0 ? 1 : 0
       end
     end
     
