@@ -49,7 +49,7 @@ module Rmap
       'second_ge' => lambda {|left,right| "second(#{left}) >= #{right}"},
     }
     
-    attr_accessor :name
+    attr_accessor :name, :page
     
     def initialize(database, name)
       @database = database
@@ -58,6 +58,7 @@ module Rmap
       Table::BINARY_FILTER_METHODS.each {|name, block| @binary_filter_methods_args[name] = []}
       @join_list = []
       @order_by_list = []
+      @page = 1
     end
   
     Table::BINARY_FILTER_METHODS.each do |name,block|
@@ -351,14 +352,11 @@ module Rmap
     
     def paginate(page_size = 10)
       @page_size = page_size
-      if @page.nil?
-        @page = 1
-      end
       self
     end
     
-    def go_to_page(page)
-      @page = page
+    def set_page(page)
+      @page = page.to_i
       self
     end
     
