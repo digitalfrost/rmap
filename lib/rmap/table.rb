@@ -243,7 +243,7 @@ module Rmap
     end
     
     def generate_limit_sql
-      @page.nil? ? "" : "limit #{(@page - 1) * @page_size}, #{@page_size}"
+      @page_size.nil? ? "" : "limit #{(@page - 1) * @page_size}, #{@page_size}"
     end
     
     def generate_select_sql(expression_list_sql, without_limit = false)
