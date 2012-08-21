@@ -349,9 +349,16 @@ module Rmap
       end
     end
     
-    def paginate(page, page_size = 10)
-      @page = page
+    def paginate(page_size = 10)
       @page_size = page_size
+      if @page.nil?
+        @page = 1
+      end
+      self
+    end
+    
+    def go_to_page(page)
+      @page = page
       self
     end
     
