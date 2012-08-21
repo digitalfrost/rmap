@@ -362,7 +362,7 @@ module Rmap
     
     def page_count
       count_without_limit = @database.client.query(generate_select_sql('id', true)).count
-      if !@page.nil?
+      if !@page_size.nil?
         (count_without_limit.to_f / @page_size).ceil
       else
         count_without_limit > 0 ? 1 : 0
