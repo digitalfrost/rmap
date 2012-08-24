@@ -316,7 +316,6 @@ module Rmap
         @database.client.query("alter table `#{@name}` add `#{name}` int signed not null")
       when :foreign_key
         @database.client.query("alter table `#{@name}` add `#{name}` int unsigned not null")
-        @database.client.query("alter table `#{@name}` add index(`#{name}`)")
       when :date
         @database.client.query("alter table `#{@name}` add `#{name}` date not null")
       when :datetime
@@ -326,6 +325,11 @@ module Rmap
       when :decimal
         @database.client.query("alter table `#{@name}` add `#{name}` decimal not null")
       end
+      
+      if type == :foreign_key || options[:index] == true
+        @database.client.query("alter table `#{@name}` add index(`#{name}`)")
+      end
+      
     end
     
     def remove(name)
