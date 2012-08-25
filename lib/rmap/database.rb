@@ -3,6 +3,13 @@ require 'mysql2'
 
 module Rmap
   class Database
+  
+    def self.create(database, connection = {})
+      connection = {:host => "localhost", :username => "root", :password => ""}.merge connection
+      Mysql2::Client.new(connection).query("create database `#{database}`");
+      connection[:database] = database
+      self.new(connection)
+    end
     
     def initialize(connection={}, &block)
       self.connection = connection
