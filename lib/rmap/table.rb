@@ -90,6 +90,8 @@ module Rmap
         all.map{|row| row.fetch(name).first}
       elsif column?(name.to_s.sub(/=\Z/, "")) && name.match(/\A(.*)=\Z/)
         all.each{|row| row.update($1 => args[0])}
+      elsif name.match /\Afind_by_(.*)\Z/
+        eq($1, args[0]).first
       elsif name.match /\A(.*?)_(#{BINARY_FILTER_METHODS.keys.join('|')})\Z/
         @binary_filter_methods_args[$2].push([$1.split(/_or_/),args[0]])
         self
@@ -371,6 +373,17 @@ module Rmap
       else
         count_without_limit > 0 ? 1 : 0
       end
+    end
+    
+    def find(arg1)
+      if arg1.respond_to? :to_hash
+        arg1.to_hash.each do |k,v|
+          self.eq(k, v)
+        end
+      else
+        self.id_eq(arg1)
+      end
+      first
     end
     
     private

@@ -11,6 +11,20 @@ module Rmap
       self.new(connection)
     end
     
+    def self.drop(database, connection = {})
+      connection = {:host => "localhost", :username => "root", :password => ""}.merge connection
+      Mysql2::Client.new(connection).query("drop database `#{database}`");
+    end
+    
+    def self.list(connection = {})
+      connection = {:host => "localhost", :username => "root", :password => ""}.merge connection
+      Mysql2::Client.new(connection).query("show databases", :as => :array).map{|a| a[0]}
+    end
+    
+    def self.exists?(database, connection = {})
+      list(connection).include? database.to_s
+    end
+    
     def initialize(connection={}, &block)
       self.connection = connection
       if !block.nil?
