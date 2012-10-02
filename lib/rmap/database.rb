@@ -70,8 +70,12 @@ module Rmap
       table_names.include?(name.to_s)
     end
     
+    def table(name)
+      Table.new(self, name.to_s)
+    end
+    
     def method_missing name, *args
-      Table.new(self, name)
+      table(name)
     end
     
     def create(name)
