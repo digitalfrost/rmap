@@ -46,6 +46,14 @@ module Rmap
       @client
     end
     
+    def connected?
+      begin 
+        client.ping && !client.query("select database()", :as => :array).first.first.nil?
+      rescue Exception => e
+        false
+      end
+    end
+    
     def close
       if !@client.nil?
         @client.close
