@@ -48,7 +48,7 @@ module Rmap
     
     def connected?
       begin 
-        client.ping && !client.query("select database()", :as => :array).first.first.nil?
+        client.ping && client.query("select database()", :as => :array).first.first
       rescue Exception => e
         false
       end
